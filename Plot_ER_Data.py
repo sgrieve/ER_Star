@@ -84,8 +84,7 @@ def PropagateErrors(PatchData,BasinData):
     patchLH = unp.uarray(PatchData[2],PatchData[4])
     patchR = unp.uarray(PatchData[10],PatchData[12])
     patchCHT = unp.uarray(PatchData[6],PatchData[8])
-    
-    #still need to generate basin error data
+
     basinLH = unp.uarray(BasinData[5],BasinData[13])
     basinR = unp.uarray(BasinData[7],BasinData[15])
     basinCHT = unp.uarray(BasinData[6],BasinData[14])
@@ -193,13 +192,11 @@ def PlotPatchesArea(Sc,PatchData,thresh,alpha):
 
     x = []
     y = []
-    A = []
     
     for a,b,s in zip(e_star,r_star,area):
         if s > thresh:
             x.append(a)
             y.append(b)
-            A.append(s)
                     
     plt.plot(x,y,color='k',alpha=alpha,marker='o',linestyle='',label='Min. Patch Area = '+str(thresh))
     
