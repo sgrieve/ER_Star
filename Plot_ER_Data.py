@@ -413,6 +413,7 @@ def OCRRoering():
     
 def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchFlag,BasinFlag,LandscapeFlag,Order,ForceSc=False,ErrorBarFlag=True,Format='png'):
 
+    
     RawData,PatchData,BasinData = LoadData(Path,Prefix,Order)
 
     PatchDataErrs, BasinDataErrs = PropagateErrors(PatchData,BasinData)
@@ -457,8 +458,60 @@ def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchF
 
     SavePlot(Path,Prefix+'_basin_order',Format)    
     
+def IngestSettings():
+    import Settings
+    import sys
     
-MakeThePlot('C:\\Users\\Stuart\\Dropbox\\data\\final\\','GM','patches',0,0,'',20,0,1,0,2,ForceSc=0.8,ErrorBarFlag=False,Format='png')
+    
+    #typecheck inputs
+    if not isinstance(Settings.Path, str):
+        sys.exit('Path=%s \nThis is not a valid string and so cannot be used as a path.\nExiting...' % Settings.Path)
+        
+    if not isinstance(Settings.Prefix, str):
+        sys.exit('Prefix=%s \nThis is not a valid string and so cannot be used as a filename prefix.\nExiting...' % Settings.Prefix)
+        
+    #Settings.Sc_Method #3 options
+    
+    if not isinstance(Settings.RawFlag, int):
+        sys.exit('RawFlag should be set to 1 to plot the raw data or 0 to exclude the raw data. You have entered %s\nExiting...' % Settings.RawFlag)
+      
+    if not isinstance(Settings.DensityFlag, int):
+        sys.exit('DensityFlag should be set to 1 to produce a density plot or 0 to not plot a density plot. Integer values greater than 1 will thin the data before plotting. You have entered %s\nExiting...' % Settings.DensityFlag)
+        
+    #Settings.BinFlag #2 options
+    
+    if not isinstance(Settings.NumBins, int):
+        sys.exit('NumBins should be set to the number of bins to be generated when binning the data. If no binning is to be performed, set the value to 0. You have entered %s\nExiting...' % Settings.NumBins)            
+    
+    if not isinstance(Settings.PatchFlag, int):
+        sys.exit('PatchFlag should be set to 1 to plot the patch data or 0 to exclude the patch data. You have entered %s\nExiting...' % Settings.PatchFlag)
+        
+    if not isinstance(Settings.BasinFlag, int):
+        sys.exit('BasinFlag should be set to 1 to plot the basin data or 0 to exclude the basin data. You have entered %s\nExiting...' % Settings.BasinFlag)
+        
+    if not isinstance(Settings.LandscapeFlag, int):
+        sys.exit('LandscapeFlag should be set to 1 to plot the landscape average data or 0 to exclude the landscape average data. You have entered %s\nExiting...' % Settings.LandscapeFlag)
+        
+    if not isinstance(Settings.Order, int):
+        sys.exit('Order should be set to an integer (eg 1,2,3, etc) to load the basin average data generated for that order of basin. You have entered %s\nExiting...' % Settings.Order)
+        
+
+    
+    #Settings.ForceSc#hmmmmm
+    
+    if not isinstance(Settings.ErrorBarFlag, bool):
+        sys.exit('ErrorBarFlag should be set to either True or False. True will generate plots with errorbars, False will exclude them. You have entered %s\nExiting...' % Settings.Order)
+    
+    #Settings.Format    #restricted options
+    
+    
+    MakeThePlot(Settings.Path,Settings.Prefix,Settings.Sc_Method,Settings.RawFlag,Settings.DensityFlag,Settings.BinFlag,Settings.NumBins,Settings.PatchFlag,Settings.BasinFlag,Settings.LandscapeFlag,Settings.Order,Settings.ForceSc,Settings.ErrorBarFlag,Settings.Format)
+    
+IngestSettings()    
+    
+#MakeThePlot('GM','patches',0,0,'',20,0,1,0,2,ForceSc=0.8,ErrorBarFlag=False,Format='png')
+
+
 
 #for l in ['GM','OR','NC','CR']:
 #    for m in ['raw','patches','basins']:
