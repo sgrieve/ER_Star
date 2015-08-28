@@ -1,4 +1,3 @@
-# GeneralAnalysis
-Place to store general data analysis scripts
+# E\* R\* Code
 
-A bit of a dumping ground to keep track of python code that doesnt have a specific place yet.
+Code to analyse E\*R\* data and produce plots for an upcoming paper.
