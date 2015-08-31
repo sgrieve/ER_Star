@@ -411,8 +411,7 @@ def OCRRoering():
     
     plt.errorbar(x,y,yerr,xerr,'k^',label='Roering et al. 2007')
     
-def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchFlag,BasinFlag,LandscapeFlag,Order,ErrorBarFlag=True,Format='png'):
-
+def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchFlag,BasinFlag,LandscapeFlag,Order,ErrorBarFlag=True,Format='png',ComparisonData=(False,False,False)):
     
     RawData,PatchData,BasinData = LoadData(Path,Prefix,Order)
 
@@ -449,14 +448,17 @@ def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchF
     if LandscapeFlag:
         PlotLandscapeAverage(Sc,RawData,ErrorBarFlag)
 
-    #OCRRoering()
-    #GMRoering()
-    #CRHurst()
-    
+    if ComparisonData[0]:
+        GMRoering()    
+    if ComparisonData[1]:
+        OCRRoering()
+    if ComparisonData[2]:
+        CRHurst()
+
     Labels(Sc,Sc_Method,ax)
     #plt.show()
 
-    SavePlot(Path,Prefix+'_basin_order',Format)    
+    SavePlot(Path,Prefix,Format)    
     
 def IngestSettings():
     import Settings
@@ -513,8 +515,15 @@ def IngestSettings():
         sys.exit('Format=%s \nFile format must be a valid string.\nExiting...' % Settings.Format)
         if Settings.Format.lower() not in ValidFormats:
             sys.exit('Format=%s \nFile format must be one of: png, pdf, ps, eps or svg.\nExiting...' % Settings.Format)
-                
-    MakeThePlot(Settings.Path,Settings.Prefix,Settings.Sc_Method,Settings.RawFlag,Settings.DensityFlag,Settings.BinFlag,Settings.NumBins,Settings.PatchFlag,Settings.BasinFlag,Settings.LandscapeFlag,Settings.Order,Settings.ErrorBarFlag,Settings.Format)
+
+    if not isinstance(Settings.GabilanMesa, bool):
+        sys.exit('GabilanMesa should be set to either True or False. True will plot data from Roering et al. (2007), False will not. You have entered %s\nExiting...' % Settings.GabilanMesa)
+    if not isinstance(Settings.OregonCoastRange, bool):
+        sys.exit('OregonCoastRange should be set to either True or False. True will plot data from Roering et al. (2007), False will not. You have entered %s\nExiting...' % Settings.OregonCoastRange)
+    if not isinstance(Settings.SierraNevada, bool):
+        sys.exit('SierraNevada should be set to either True or False. True will plot data from Roering et al. (2007), False will not. You have entered %s\nExiting...' % Settings.SierraNevada)
+            
+    MakeThePlot(Settings.Path,Settings.Prefix,Settings.Sc_Method,Settings.RawFlag,Settings.DensityFlag,Settings.BinFlag,Settings.NumBins,Settings.PatchFlag,Settings.BasinFlag,Settings.LandscapeFlag,Settings.Order,Settings.ErrorBarFlag,Settings.Format,(Settings.GabilanMesa,Settings.OregonCoastRange,Settings.SierraNevada))
     
 IngestSettings()    
     
