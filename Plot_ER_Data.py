@@ -507,10 +507,13 @@ def IngestSettings():
     
     if not isinstance(Settings.ErrorBarFlag, bool):
         sys.exit('ErrorBarFlag should be set to either True or False. True will generate plots with errorbars, False will exclude them. You have entered %s\nExiting...' % Settings.Order)
-    
-    #Settings.Format    #restricted options
-    
-    
+        
+    ValidFormats = ['png', 'pdf','ps', 'eps','svg']
+    if not isinstance(Settings.Format, str):
+        sys.exit('Format=%s \nFile format must be a valid string.\nExiting...' % Settings.Format)
+        if Settings.Format.lower() not in ValidFormats:
+            sys.exit('Format=%s \nFile format must be one of: png, pdf, ps, eps or svg.\nExiting...' % Settings.Format)
+                
     MakeThePlot(Settings.Path,Settings.Prefix,Settings.Sc_Method,Settings.RawFlag,Settings.DensityFlag,Settings.BinFlag,Settings.NumBins,Settings.PatchFlag,Settings.BasinFlag,Settings.LandscapeFlag,Settings.Order,Settings.ErrorBarFlag,Settings.Format)
     
 IngestSettings()    
