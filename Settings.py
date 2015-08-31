@@ -21,3 +21,7 @@ Sc_Method = 'patches'
 ErrorBarFlag = True
 Format = 'png'
 
+#Comparison data to be plotted
+GabilanMesa = False
+OregonCoastRange = False
+SierraNevada = False
