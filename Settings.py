@@ -16,7 +16,6 @@ LandscapeFlag = 0
 
 # how Sc is constrained
 Sc_Method = 'patches'
-ForceSc = False
 
 #plot style options
 ErrorBarFlag = True
