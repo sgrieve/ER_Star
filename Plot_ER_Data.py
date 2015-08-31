@@ -461,8 +461,7 @@ def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchF
 def IngestSettings():
     import Settings
     import sys
-    
-    
+        
     #typecheck inputs
     if not isinstance(Settings.Path, str):
         sys.exit('Path=%s \nThis is not a valid string and so cannot be used as a path.\nExiting...' % Settings.Path)
@@ -483,8 +482,13 @@ def IngestSettings():
       
     if not isinstance(Settings.DensityFlag, int):
         sys.exit('DensityFlag should be set to 1 to produce a density plot or 0 to not plot a density plot. Integer values greater than 1 will thin the data before plotting. You have entered %s\nExiting...' % Settings.DensityFlag)
-        
-    #Settings.BinFlag #2 options
+    
+    if not isinstance(Settings.BinFlag, str):
+        sys.exit('BinFlag=%s \nThis is not a valid string to select the binning method. If not performing binning, enter a blank string: \'\'.\nExiting...' % Settings.BinFlag)
+    else:
+        if Settings.BinFlag:
+            if Settings.BinFlag.lower() == 'raw' or Settings.BinFlag.lower() == 'patches':
+                sys.exit('BinFlag=%s \nSelect either \'raw\' or \'patches\' as the binning method. enter a blank string: \'\'.\nExiting...' % Settings.BinFlag)    
     
     if not isinstance(Settings.NumBins, int):
         sys.exit('NumBins should be set to the number of bins to be generated when binning the data. If no binning is to be performed, set the value to 0. You have entered %s\nExiting...' % Settings.NumBins)            
