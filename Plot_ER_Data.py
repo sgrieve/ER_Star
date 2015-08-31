@@ -349,7 +349,7 @@ def UnserializeData(serial):
     split = [float(s) for s in serial.split(',')]
     return split[0],split[1],split[2]
     
-def Labels(Sc,Method,ForceSc,ax):
+def Labels(Sc,Method,ax):
     
     #remove errorbars from the legend    
     handles, labels = ax.get_legend_handles_labels()   
@@ -375,8 +375,8 @@ def Labels(Sc,Method,ForceSc,ax):
     elif Method.lower() == 'basins':
         fit_description = ' from basin average data = '
 
-    if ForceSc:        
-        plt.title('$\mathregular{S_c}$ forced as = ' + str(round(Sc,2)))        
+    if isinstance(Method,int) or isinstance(Method,float):
+        plt.title('$\mathregular{S_c}$ set as = ' + str(round(Sc,2)))        
     else:
         plt.title('Best fit $\mathregular{S_c}$'+fit_description+str(round(Sc,2)))
 
@@ -411,7 +411,7 @@ def OCRRoering():
     
     plt.errorbar(x,y,yerr,xerr,'k^',label='Roering et al. 2007')
     
-def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchFlag,BasinFlag,LandscapeFlag,Order,ForceSc=False,ErrorBarFlag=True,Format='png'):
+def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchFlag,BasinFlag,LandscapeFlag,Order,ErrorBarFlag=True,Format='png'):
 
     
     RawData,PatchData,BasinData = LoadData(Path,Prefix,Order)
@@ -422,8 +422,8 @@ def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchF
     
     DrawCurve()
     
-    if ForceSc:
-        Sc = ForceSc
+    if isinstance(Sc_Method,int) or isinstance(Sc_Method,float):
+        Sc = Sc_Method
     else:
         if Sc_Method.lower() == 'raw':
             Sc,chi = GetBestFitSc(Sc_Method, RawData)
@@ -453,7 +453,7 @@ def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchF
     #GMRoering()
     #CRHurst()
     
-    Labels(Sc,Sc_Method,ForceSc, ax)
+    Labels(Sc,Sc_Method,ax)
     #plt.show()
 
     SavePlot(Path,Prefix+'_basin_order',Format)    
@@ -469,9 +469,15 @@ def IngestSettings():
         
     if not isinstance(Settings.Prefix, str):
         sys.exit('Prefix=%s \nThis is not a valid string and so cannot be used as a filename prefix.\nExiting...' % Settings.Prefix)
-        
-    #Settings.Sc_Method #3 options
-    
+
+    if not isinstance(Settings.Sc_Method, str) and not isinstance(Settings.Sc_Method, float):
+        sys.exit('Sc_Method=%s \nThis is not a valid string or floating point value.\nExiting...' % Settings.Sc_Method)
+    else:
+        if Settings.Sc_Method.lower() == 'raw' or Settings.Sc_Method.lower() == 'patches' or Settings.Sc_Method.lower() == 'basins':
+            sys.exit('Sc_Method=%s \nThis is not a valid method to fit a critical gradient. Valid options are \'raw\',\'patches\', or \'basins\'.\nExiting...' % Settings.Sc_Method)
+        if Settings.Sc_Method <= 0 or Settings.Sc_Method > 3:
+            sys.exit('Sc_Method=%s \nThis critical gradient not within a expected range of 0 to 3.\nExiting...' % Settings.Sc_Method)
+                
     if not isinstance(Settings.RawFlag, int):
         sys.exit('RawFlag should be set to 1 to plot the raw data or 0 to exclude the raw data. You have entered %s\nExiting...' % Settings.RawFlag)
       
@@ -494,10 +500,6 @@ def IngestSettings():
         
     if not isinstance(Settings.Order, int):
         sys.exit('Order should be set to an integer (eg 1,2,3, etc) to load the basin average data generated for that order of basin. You have entered %s\nExiting...' % Settings.Order)
-        
-
-    
-    #Settings.ForceSc#hmmmmm
     
     if not isinstance(Settings.ErrorBarFlag, bool):
         sys.exit('ErrorBarFlag should be set to either True or False. True will generate plots with errorbars, False will exclude them. You have entered %s\nExiting...' % Settings.Order)
@@ -505,17 +507,17 @@ def IngestSettings():
     #Settings.Format    #restricted options
     
     
-    MakeThePlot(Settings.Path,Settings.Prefix,Settings.Sc_Method,Settings.RawFlag,Settings.DensityFlag,Settings.BinFlag,Settings.NumBins,Settings.PatchFlag,Settings.BasinFlag,Settings.LandscapeFlag,Settings.Order,Settings.ForceSc,Settings.ErrorBarFlag,Settings.Format)
+    MakeThePlot(Settings.Path,Settings.Prefix,Settings.Sc_Method,Settings.RawFlag,Settings.DensityFlag,Settings.BinFlag,Settings.NumBins,Settings.PatchFlag,Settings.BasinFlag,Settings.LandscapeFlag,Settings.Order,Settings.ErrorBarFlag,Settings.Format)
     
 IngestSettings()    
     
-#MakeThePlot('GM','patches',0,0,'',20,0,1,0,2,ForceSc=0.8,ErrorBarFlag=False,Format='png')
+#MakeThePlot('GM','patches',0,0,'',20,0,1,0,2,ErrorBarFlag=False,Format='png')
 
 
 
 #for l in ['GM','OR','NC','CR']:
 #    for m in ['raw','patches','basins']:
 #        print l,m        
-#        MakeThePlot('C:\\Users\\Stuart\\Dropbox\\data\\final\\',l,m,0,0,'',20,0,1,0,2,ForceSc=False,ErrorBarFlag=False,Format='png')
+#        MakeThePlot('C:\\Users\\Stuart\\Dropbox\\data\\final\\',l,m,0,0,'',20,0,1,0,2,ErrorBarFlag=False,Format='png')
 
 
