@@ -511,10 +511,10 @@ def IngestSettings():
         sys.exit('LandscapeFlag should be set to 1 to plot the landscape average data or 0 to exclude the landscape average data. You have entered %s\nExiting...' % Settings.LandscapeFlag)
         
     if not isinstance(Settings.Order, int):
-        sys.exit('Order should be set to an integer (eg 1,2,3, etc) to load the basin average data generated for that order of basin. You have entered %s\nExiting...' % Settings.Order)
+        sys.exit('Order should be set to an integer (eg 1,2,3, etc) to load the basin average data generated for that order of basin. You have entered %s, of %s\nExiting...' % (Settings.Order, type(Settings.Order)))
     
     if not isinstance(Settings.ErrorBarFlag, bool):
-        sys.exit('ErrorBarFlag should be set to either True or False. True will generate plots with errorbars, False will exclude them. You have entered %s\nExiting...' % Settings.Order)
+        sys.exit('ErrorBarFlag should be set to either True or False. True will generate plots with errorbars, False will exclude them. You have entered %s\nExiting...' % Settings.ErrorBarFlag)
         
     ValidFormats = ['png', 'pdf','ps', 'eps','svg']
     if not isinstance(Settings.Format, str):
