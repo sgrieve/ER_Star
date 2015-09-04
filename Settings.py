@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # params to load the data
-Path = 2#'C:\\Users\\Stuart\\Dropbox\\data\\final\\' #must be wrapped in quotes with a trailing slash eg 'home/user/data/'
-Prefix = 'GM'
+Path = 'C:\\Users\\Stuart\\Dropbox\\data\\final\\' #must be wrapped in quotes with a trailing slash eg 'home/user/data/'
+Prefix = 'OR'
 Order = 2
 
 #data to plot
@@ -15,10 +15,10 @@ BasinFlag = 1
 LandscapeFlag = 0
 
 # how Sc is constrained
-Sc_Method = 'patches'
+Sc_Method = 'basins'
 
 #plot style options
-ErrorBarFlag = True
+ErrorBarFlag = False
 Format = 'png'
 
 #Comparison data to be plotted
