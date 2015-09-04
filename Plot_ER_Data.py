@@ -296,21 +296,24 @@ def GetBestFitSc(Method, Data, DataErrs=None):
     ScInit = 0.8  # Need to have an initial for the optimizer, any valid Sc value can be used - will not impact the final value
     Fit_Sc = [] #Need to initialize this in case Method is incorrectly defined. Need some error handling!
 
-    if Method.lower() == 'raw':
+    if Method == 'raw':
         Fit_Sc,_,infodict,_,_ = optimize.leastsq(Residuals, ScInit, args=(Data[4], Data[2], Data[3]),full_output=True)
         chi = reduced_chi_square(infodict['fvec'],Fit_Sc[0])         
-    elif Method.lower() == 'patches':
+    elif Method == 'patches':
         Fit_Sc,_,infodict,_,_ = optimize.leastsq(Residuals, ScInit, args=(Data[10], Data[2], Data[6]),full_output=True)
         chi = reduced_chi_square(infodict['fvec'],Fit_Sc[0],DataErrs)
-    elif Method.lower() == 'basins':
+    elif Method == 'basins':
         Fit_Sc,_,infodict,_,_ = optimize.leastsq(Residuals, ScInit, args=(Data[7], Data[5], Data[6]),full_output=True)
         chi = reduced_chi_square(infodict['fvec'],Fit_Sc[0],DataErrs)
         
     return Fit_Sc[0],chi
 
-def BootstrapSc(Method, Data, n=1000):
+def BootstrapSc(Method, Data, n=100):
     tmp = []
     #need to convert the LH,R,CHT data into a serial 1D array before bootstrapping    
+    if Method == 'raw':
+        for i in range(len(Data[0])):
+            tmp.append(SerializeData(Data[2][i],Data[4][i],Data[3][i]))    
     if Method == 'patches':
         for i in range(len(Data[0])):
             tmp.append(SerializeData(Data[2][i],Data[10][i],Data[6][i]))
@@ -321,12 +324,17 @@ def BootstrapSc(Method, Data, n=1000):
     ToSample = np.array(tmp)
     
     Scs = []    
-    for i in range(n):
+    i=0
+    while i < n:    
+        print i
+    
         sample = np.random.choice(ToSample,len(ToSample),replace=True)
         LH,R,CHT = UnserializeList(sample)
         sc,_,_,_,_ = optimize.leastsq(Residuals, 0.8, args=(R, LH, CHT),full_output=True)
-        
-        Scs.append(sc[0])
+        if sc < 2.0:
+            Scs.append(sc[0])
+            i += 1
+            
     #        mean          upper bound                               lower bound    
     return np.mean(Scs),np.percentile(Scs,97.5)-np.mean(Scs), np.mean(Scs)-np.percentile(Scs,2.5)
         
@@ -366,13 +374,13 @@ def Labels(Sc,Method,ax):
     #in case Method is invalid
     fit_description = ' = '
 
-    if Method.lower() == 'raw':
+    if Method == 'raw':
         fit_description = ' from raw data = '
 
-    elif Method.lower() == 'patches':
+    elif Method == 'patches':
         fit_description = ' from hilltop patches = '
 
-    elif Method.lower() == 'basins':
+    elif Method == 'basins':
         fit_description = ' from basin average data = '
 
     if isinstance(Method,int) or isinstance(Method,float):
@@ -424,14 +432,12 @@ def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchF
     if isinstance(Sc_Method,int) or isinstance(Sc_Method,float):
         Sc = Sc_Method
     else:
-        if Sc_Method.lower() == 'raw':
-            Sc,chi = GetBestFitSc(Sc_Method, RawData)
-        if Sc_Method.lower() == 'patches':
-            #Sc,chi = GetBestFitSc(Sc_Method, PatchData, PatchDataErrs) 
+        if Sc_Method == 'raw':            
+            Sc,upper,lower = BootstrapSc(Sc_Method, RawData)
+        if Sc_Method == 'patches':                      
             Sc,upper,lower = BootstrapSc(Sc_Method, PatchData)
-        if Sc_Method.lower() == 'basins':
-            #Sc,chi = GetBestFitSc(Sc_Method, BasinData, BasinDataErrs)
-            Sc,upper,lower = BootstrapSc(Sc_Method, PatchData)
+        if Sc_Method == 'basins':
+            Sc,upper,lower = BootstrapSc(Sc_Method, BasinData)
     
     if RawFlag:
         PlotRaw(Sc,RawData)
@@ -439,9 +445,9 @@ def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchF
         PlotRawDensity(Sc,RawData,DensityFlag)
     if PatchFlag:
         PlotPatches(Sc,PatchDataErrs,ErrorBarFlag)
-    if BinFlag.lower() == 'patches':
+    if BinFlag == 'patches':
         PlotPatchBins(Sc,PatchData,NumBins,ErrorBars=ErrorBarFlag)
-    elif BinFlag.lower() == 'raw':
+    elif BinFlag == 'raw':
         PlotRawBins(Sc,RawData,NumBins,ErrorBars=ErrorBarFlag)
     if BasinFlag:
         PlotBasins(Sc,BasinDataErrs,ErrorBarFlag)
@@ -456,9 +462,9 @@ def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchF
         CRHurst()
 
     Labels(Sc,Sc_Method,ax)
-    #plt.show()
+    plt.show()
 
-    SavePlot(Path,Prefix,Format)    
+    #SavePlot(Path,Prefix,Format)    
     
 def IngestSettings():
     import Settings
@@ -473,10 +479,10 @@ def IngestSettings():
 
     if not isinstance(Settings.Sc_Method, str) and not isinstance(Settings.Sc_Method, float):
         sys.exit('Sc_Method=%s \nThis is not a valid string or floating point value.\nExiting...' % Settings.Sc_Method)
-    else:
-        if Settings.Sc_Method.lower() == 'raw' or Settings.Sc_Method.lower() == 'patches' or Settings.Sc_Method.lower() == 'basins':
+    else:        
+        if isinstance(Settings.Sc_Method, str) and (Settings.Sc_Method != 'raw' and Settings.Sc_Method != 'patches' and Settings.Sc_Method != 'basins'):
             sys.exit('Sc_Method=%s \nThis is not a valid method to fit a critical gradient. Valid options are \'raw\',\'patches\', or \'basins\'.\nExiting...' % Settings.Sc_Method)
-        if Settings.Sc_Method <= 0 or Settings.Sc_Method > 3:
+        if isinstance(Settings.Sc_Method, float) and (Settings.Sc_Method <= 0 or Settings.Sc_Method > 3):
             sys.exit('Sc_Method=%s \nThis critical gradient not within a expected range of 0 to 3.\nExiting...' % Settings.Sc_Method)
                 
     if not isinstance(Settings.RawFlag, int):
