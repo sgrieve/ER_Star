@@ -462,9 +462,9 @@ def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchF
         CRHurst()
 
     Labels(Sc,Sc_Method,ax)
-    plt.show()
+    #plt.show()
 
-    #SavePlot(Path,Prefix,Format)    
+    SavePlot(Path,Prefix,Format)    
     
 def IngestSettings():
     import Settings
