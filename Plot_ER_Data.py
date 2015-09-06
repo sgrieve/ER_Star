@@ -88,6 +88,11 @@ def LoadData(Path,Prefix,Order):
 
 
 def PropagateErrors(PatchData,BasinData):
+    """
+    Load the hillslope, Relief and hilltop curavture data from the basin and 
+    patch data files into the uncertainties package, so that we can propagate 
+    errors through our calculations.
+    """
        
     #median, sem
     patchLH = unp.uarray(PatchData[2],PatchData[4])
@@ -101,6 +106,9 @@ def PropagateErrors(PatchData,BasinData):
     return (patchLH,patchR,patchCHT),(basinLH,basinR,basinCHT)
         
 def SetUpPlot():
+    """
+    Configure the plotting environment.
+    """
     rcParams['font.family'] = 'sans-serif'
     rcParams['font.sans-serif'] = ['arial']
     rcParams['font.size'] = 14
@@ -119,11 +127,19 @@ def SetUpPlot():
     return ax
 
 def PlotRaw(Sc,RawData):
+    """
+    Plot the raw E*R* data as small grey points.
+    """
     plt.plot(E_Star(Sc,RawData[3],RawData[2]),R_Star(Sc,RawData[4],RawData[2]),
     'k.',alpha=0.2,label='Raw Data')
     
 def PlotRawDensity(Sc,RawData,Thin):
-    #http://stackoverflow.com/a/20107592/1627162
+    """
+    Plot the raw E*R* data as a density plot, computing the PDF as a gaussian
+    and including a colorbar.
+    
+    Built around code from: http://stackoverflow.com/a/20107592/1627162
+    """    
     x = E_Star(Sc,RawData[3],RawData[2])
     y = R_Star(Sc,RawData[4],RawData[2])
     
@@ -143,6 +159,9 @@ def PlotRawDensity(Sc,RawData,Thin):
     cbar.set_label('Probability Distribution Function')
 
 def PlotRawBins(Sc,RawData,NumBins,MinimumBinSize=100,ErrorBars=True):
+    """
+    Plot E*R* data binned from the raw data.
+    """
     E_s = E_Star(Sc, RawData[3], RawData[2])
     R_s = R_Star(Sc, RawData[4], RawData[2])
 
@@ -163,6 +182,9 @@ def PlotRawBins(Sc,RawData,NumBins,MinimumBinSize=100,ErrorBars=True):
         plt.errorbar(bin_x, bin_y, fmt='bo',label='Binned Raw Data')
 
 def PlotPatchBins(Sc,PatchData,NumBins,MinimumBinSize=10,ErrorBars=True):
+    """
+    Plot E*R* data binned from the hilltop pacth data.
+    """
     E_s = E_Star(Sc,PatchData[6],PatchData[2])
     R_s = R_Star(Sc,PatchData[10],PatchData[2])
 
@@ -183,7 +205,7 @@ def PlotPatchBins(Sc,PatchData,NumBins,MinimumBinSize=10,ErrorBars=True):
     else:
         plt.errorbar(bin_x, bin_y, fmt='bo',label='Binned Patch Data')        
     
-def PlotPatches(Sc,PatchData,ErrorBars):                     
+def PlotPatches(Sc,PatchData,ErrorBars):
 
     e_star = E_Star(Sc,PatchData[2],PatchData[0])
     r_star = R_Star(Sc,PatchData[1],PatchData[0])
