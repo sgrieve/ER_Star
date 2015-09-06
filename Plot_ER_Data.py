@@ -308,7 +308,7 @@ def GetBestFitSc(Method, Data, DataErrs=None):
         
     return Fit_Sc[0],chi
 
-def BootstrapSc(Method, Data, n=100):
+def BootstrapSc(Method, Data, n=10000):
     tmp = []
     #need to convert the LH,R,CHT data into a serial 1D array before bootstrapping    
     if Method == 'raw':
@@ -528,6 +528,10 @@ def IngestSettings():
         sys.exit('OregonCoastRange should be set to either True or False. True will plot data from Roering et al. (2007), False will not. You have entered %s\nExiting...' % Settings.OregonCoastRange)
     if not isinstance(Settings.SierraNevada, bool):
         sys.exit('SierraNevada should be set to either True or False. True will plot data from Roering et al. (2007), False will not. You have entered %s\nExiting...' % Settings.SierraNevada)
+
+    if not isinstance(Settings.NumBootsraps, int):
+        sys.exit('NumBootsraps should be set to an integer (eg 10000) to select the number of iterations in the bootstrapping calculation.\n\nThis value is ignored if a value of Sc is supplied. Using a value > 10000 will take a long time on big datasets. You have entered %s, of %s\nExiting...' % (Settings.NumBootsraps, type(Settings.NumBootsraps)))
+    
             
     MakeThePlot(Settings.Path,Settings.Prefix,Settings.Sc_Method,Settings.RawFlag,Settings.DensityFlag,Settings.BinFlag,Settings.NumBins,Settings.PatchFlag,Settings.BasinFlag,Settings.LandscapeFlag,Settings.Order,Settings.ErrorBarFlag,Settings.Format,(Settings.GabilanMesa,Settings.OregonCoastRange,Settings.SierraNevada))
     
