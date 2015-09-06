@@ -419,7 +419,7 @@ def OCRRoering():
     
     plt.errorbar(x,y,yerr,xerr,'k^',label='Roering et al. 2007')
     
-def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchFlag,BasinFlag,LandscapeFlag,Order,ErrorBarFlag=True,Format='png',ComparisonData=(False,False,False)):
+def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchFlag,BasinFlag,LandscapeFlag,Order,ErrorBarFlag=True,Format='png',ComparisonData=(False,False,False),NumBootsraps):
     
     RawData,PatchData,BasinData = LoadData(Path,Prefix,Order)
 
@@ -427,17 +427,19 @@ def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchF
         
     ax = SetUpPlot()
     
+    #test    
+    
     DrawCurve()
     
     if isinstance(Sc_Method,int) or isinstance(Sc_Method,float):
         Sc = Sc_Method
     else:
         if Sc_Method == 'raw':            
-            Sc,upper,lower = BootstrapSc(Sc_Method, RawData)
+            Sc,upper,lower = BootstrapSc(Sc_Method, RawData, NumBootsraps)
         if Sc_Method == 'patches':                      
-            Sc,upper,lower = BootstrapSc(Sc_Method, PatchData)
+            Sc,upper,lower = BootstrapSc(Sc_Method, PatchData, NumBootsraps)
         if Sc_Method == 'basins':
-            Sc,upper,lower = BootstrapSc(Sc_Method, BasinData)
+            Sc,upper,lower = BootstrapSc(Sc_Method, BasinData, NumBootsraps)
     
     if RawFlag:
         PlotRaw(Sc,RawData)
@@ -533,7 +535,7 @@ def IngestSettings():
         sys.exit('NumBootsraps should be set to an integer (eg 10000) to select the number of iterations in the bootstrapping calculation.\n\nThis value is ignored if a value of Sc is supplied. Using a value > 10000 will take a long time on big datasets. You have entered %s, of %s\nExiting...' % (Settings.NumBootsraps, type(Settings.NumBootsraps)))
     
             
-    MakeThePlot(Settings.Path,Settings.Prefix,Settings.Sc_Method,Settings.RawFlag,Settings.DensityFlag,Settings.BinFlag,Settings.NumBins,Settings.PatchFlag,Settings.BasinFlag,Settings.LandscapeFlag,Settings.Order,Settings.ErrorBarFlag,Settings.Format,(Settings.GabilanMesa,Settings.OregonCoastRange,Settings.SierraNevada))
+    MakeThePlot(Settings.Path,Settings.Prefix,Settings.Sc_Method,Settings.RawFlag,Settings.DensityFlag,Settings.BinFlag,Settings.NumBins,Settings.PatchFlag,Settings.BasinFlag,Settings.LandscapeFlag,Settings.Order,Settings.ErrorBarFlag,Settings.Format,(Settings.GabilanMesa,Settings.OregonCoastRange,Settings.SierraNevada),Settings.NumBootsraps)
     
 IngestSettings()    
     
