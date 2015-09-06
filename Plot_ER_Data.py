@@ -206,7 +206,9 @@ def PlotPatchBins(Sc,PatchData,NumBins,MinimumBinSize=10,ErrorBars=True):
         plt.errorbar(bin_x, bin_y, fmt='bo',label='Binned Patch Data')        
     
 def PlotPatches(Sc,PatchData,ErrorBars):
-
+    """
+    Plot E*R* data binned from hilltop patches.
+    """
     e_star = E_Star(Sc,PatchData[2],PatchData[0])
     r_star = R_Star(Sc,PatchData[1],PatchData[0])
     if ErrorBars:
@@ -217,6 +219,9 @@ def PlotPatches(Sc,PatchData,ErrorBars):
                      fmt='ro',label='Hilltop Patch Data')     
 
 def PlotPatchesArea(Sc,PatchData,thresh,alpha):
+    """
+    Plot patch average E*R* data filtered by a user defined patch area value.
+    """    
     e_star = E_Star(Sc,PatchData[6],PatchData[2])
     r_star = R_Star(Sc,PatchData[10],PatchData[2])
     area = PatchData[17]
@@ -232,6 +237,9 @@ def PlotPatchesArea(Sc,PatchData,thresh,alpha):
     plt.plot(x,y,color='k',alpha=alpha,marker='o',linestyle='',label='Min. Patch Area = '+str(thresh))
     
 def PlotBasins(Sc,BasinData,ErrorBars):
+    """
+    Plot basin average E*R* data.
+    """
     e_star = E_Star(Sc,BasinData[2],BasinData[0])
     r_star = R_Star(Sc,BasinData[1],BasinData[0])
     
@@ -243,6 +251,9 @@ def PlotBasins(Sc,BasinData,ErrorBars):
                      fmt='go',label='Basin Data')
 
 def PlotBasinsArea(Sc,BasinData,thresh,alpha):
+    """
+    Plot basin average E*R* data filtered by a user defined basin area value.
+    """
     e_star = E_Star(Sc,BasinData[6],BasinData[5])
     r_star = R_Star(Sc,BasinData[7],BasinData[5])
     area = BasinData[18]
@@ -258,6 +269,10 @@ def PlotBasinsArea(Sc,BasinData,thresh,alpha):
     plt.plot(x,y,color='k',alpha=alpha,marker='o',linestyle='',label='Min. Basin Data Points = '+str(thresh))
             
 def PlotLandscapeAverage(Sc,RawData,ErrorBars):
+    """
+    Plot a landscape median data point, calculated using the raw data, and generating
+    errorbars using the standard error.        
+    """
     E_Star_temp = E_Star(Sc,RawData[3],RawData[2])
     R_Star_temp = R_Star(Sc,RawData[4],RawData[2])
     E_Star_avg = np.median(E_Star_temp)
