@@ -426,9 +426,7 @@ def MakeThePlot(Path,Prefix,Sc_Method,RawFlag,DensityFlag,BinFlag,NumBins,PatchF
     PatchDataErrs, BasinDataErrs = PropagateErrors(PatchData,BasinData)
         
     ax = SetUpPlot()
-    
-    #test    
-    
+        
     DrawCurve()
     
     if isinstance(Sc_Method,int) or isinstance(Sc_Method,float):
