@@ -15,7 +15,8 @@ BasinFlag = 1
 LandscapeFlag = 0
 
 # how Sc is constrained
-Sc_Method = 'basins'
+Sc_Method = 0.8
+NumBootsraps = 10000
 
 #plot style options
 ErrorBarFlag = False
