@@ -19,12 +19,17 @@ BasinFlag = 1 #Use 1 to plot the basin data and 0 to not plot it.
 LandscapeFlag = 0 #Use 1 to plot the landscape average data and 0 to not plot it.
 
 #Options regarding the fitting of the critical gradient
-Sc_Method = 0.8
-NumBootsraps = 10000
+Sc_Method = 0.8 #Either input a real number eg 0.8,1.2,1.052 to set the Sc value and avoid
+                #the fitting of Sc. Or select 'raw','patches' or 'basins' (including the quotes)
+                #to use the named dataset to constrain the best fit Sc value through bootstrapping.
+NumBootsraps = 10000 #Number of itewrations for the bootstrapping procedure.
+                     #10000 is the default, larger values will take longer to 
+                     #process.
 
 #Plot style options
-ErrorBarFlag = False
-Format = 'png'
+ErrorBarFlag = False #True to plot errorbars on datapoints, False to exclude them.
+                     #Errorbars are generated as the standard error unless otherwise stated.
+Format = 'png' #File format for the output E*R* plots. Must be one of: 'png','pdf','ps','eps','svg'
 
 #Comparison data to be plotted from the other studies
 GabilanMesa = False #True to plot the data, False to exclude it.
