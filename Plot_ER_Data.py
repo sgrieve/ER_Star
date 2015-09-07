@@ -288,16 +288,28 @@ def PlotLandscapeAverage(Sc,RawData,ErrorBars):
     else:
         plt.errorbar(E_Star_avg,R_Star_avg, fmt='ko',label='Landscape Average')
 
-def R_Star_Model(x):    
+def R_Star_Model(x):
+    """
+    Return the predicted R* value for a given value of E* using eq 10 in Roering
+    et al. (2007) http://www.sciencedirect.com/science/article/pii/S0012821X07006061
+    """    
     return (1./x) * (np.sqrt(1.+(x*x)) - np.log(0.5*(1. + np.sqrt(1.+(x*x)))) - 1.)
 
 def E_Star(Sc,CHT,LH):
+    """
+    Calculate the E* value from topographic data after Roering et al. (2007) 
+    http://www.sciencedirect.com/science/article/pii/S0012821X07006061
+    """
     if type(LH[0]) == np.float64:
         return (2.*np.fabs(CHT)*LH)/Sc
     else:
         return (2.*unp.fabs(CHT)*LH)/Sc
    
 def R_Star(Sc, R, LH):
+    """
+    Calculate the R* value from topographic data after Roering et al. (2007) 
+    http://www.sciencedirect.com/science/article/pii/S0012821X07006061
+    """
     return R/(LH*Sc)
 
 def Residuals(Sc, R, LH, CHT):
