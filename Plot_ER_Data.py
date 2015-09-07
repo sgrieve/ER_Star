@@ -616,7 +616,7 @@ def IngestSettings():
     else:
         if Settings.BinFlag:
             if Settings.BinFlag.lower() == 'raw' or Settings.BinFlag.lower() == 'patches':
-                sys.exit('BinFlag=%s \nSelect either \'raw\' or \'patches\' as the binning method. enter a blank string: \'\'.\nExiting...' % Settings.BinFlag)    
+                sys.exit('BinFlag=%s \nSelect either \'raw\' or \'patches\' as the binning method. Enter a blank string: \'\' if no binning is required.\nExiting...' % Settings.BinFlag)    
     
     if not isinstance(Settings.NumBins, int):
         sys.exit('NumBins should be set to the number of bins to be generated when binning the data. If no binning is to be performed, set the value to 0. You have entered %s\nExiting...' % Settings.NumBins)            
