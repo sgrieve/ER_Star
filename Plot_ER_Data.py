@@ -111,7 +111,7 @@ def SetUpPlot():
     """
     rcParams['font.family'] = 'sans-serif'
     rcParams['font.sans-serif'] = ['arial']
-    rcParams['font.size'] = 14
+    rcParams['font.size'] = 15
 
     ax = plt.gca()
 
@@ -481,9 +481,9 @@ def Labels(Sc,Method,ax):
         fit_description = ' from basin average data = '
 
     if isinstance(Method,int) or isinstance(Method,float):
-        plt.title('$\mathregular{S_c}$ set as = ' + str(round(Sc,2)))        
+        plt.title('$\mathregular{S_c}$ = ' + str(round(Sc,2)), y = 1.02)        
     else:
-        plt.title('Best fit $\mathregular{S_c}$'+fit_description+str(round(Sc,2)))
+        plt.title('Best fit $\mathregular{S_c}$'+fit_description+str(round(Sc,2)), y = 1.02)
 
 def SavePlot(Path,Prefix,Format):
     """
@@ -651,8 +651,7 @@ def IngestSettings():
 
     if not isinstance(Settings.NumBootsraps, int):
         sys.exit('NumBootsraps should be set to an integer (eg 10000) to select the number of iterations in the bootstrapping calculation.\n\nThis value is ignored if a value of Sc is supplied. Using a value > 10000 will take a long time on big datasets. You have entered %s, of %s\nExiting...' % (Settings.NumBootsraps, type(Settings.NumBootsraps)))
-    
-            
+                
     MakeThePlot(Settings.Path,Settings.Prefix,Settings.Sc_Method,Settings.RawFlag,Settings.DensityFlag,Settings.BinFlag,Settings.NumBins,Settings.PatchFlag,Settings.BasinFlag,Settings.LandscapeFlag,Settings.Order,Settings.ErrorBarFlag,Settings.Format,(Settings.GabilanMesa,Settings.OregonCoastRange,Settings.SierraNevada),Settings.NumBootsraps)
     
 IngestSettings()    
