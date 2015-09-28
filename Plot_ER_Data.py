@@ -57,7 +57,9 @@ def LoadData(Path, Prefix, Order):
 
     # dimensions will be 18Xlen(patchdata) no_of_cols = 18
     # and the row order will follow the header format in the input file:
-    # Final_ID lh_means lh_medians lh_std_devs lh_std_errs cht_means cht_medians cht_std_devs cht_std_errs r_means r_medians r_std_devs r_std_errs s_means s_medians s_std_devs s_std_errs patch_size
+    # Final_ID lh_means lh_medians lh_std_devs lh_std_errs cht_means cht_medians
+    # cht_std_devs cht_std_errs r_means r_medians r_std_devs r_std_errs s_means
+    # s_medians s_std_devs s_std_errs patch_size
 
     no_of_lines = len(patchdata)
 
@@ -172,8 +174,8 @@ def PlotRawBins(Sc, RawData, NumBins, MinimumBinSize=100, ErrorBars=True):
     E_s = E_Star(Sc, RawData[3], RawData[2])
     R_s = R_Star(Sc, RawData[4], RawData[2])
 
-    bin_x, bin_std_x, bin_y, bin_std_y, std_err_x, std_err_y, count =
-    Bin.bin_data_log10(E_s, R_s, NumBins)
+    (bin_x, bin_std_x, bin_y, bin_std_y,
+     std_err_x, std_err_y, count) = Bin.bin_data_log10(E_s, R_s, NumBins)
 
     # filter bins based on the number of data points used in their calculation
     bin_x = np.ma.masked_where(count < MinimumBinSize, bin_x)
@@ -200,8 +202,8 @@ def PlotPatchBins(Sc, PatchData, NumBins, MinimumBinSize=10, ErrorBars=True):
     E_s = E_Star(Sc, PatchData[6], PatchData[2])
     R_s = R_Star(Sc, PatchData[10], PatchData[2])
 
-    bin_x, bin_std_x, bin_y, bin_std_y, std_err_x, std_err_y, count =
-    Bin.bin_data_log10(E_s, R_s, NumBins)
+    (bin_x, bin_std_x, bin_y, bin_std_y,
+     std_err_x, std_err_y, count) = Bin.bin_data_log10(E_s, R_s, NumBins)
 
     # filter bins based on the number of data points used in their calculation
     bin_x = np.ma.masked_where(count < MinimumBinSize, bin_x)
@@ -320,7 +322,8 @@ def R_Star_Model(x):
     Return the predicted R* value for a given value of E* using eq 10 in Roering
     et al. (2007) www.sciencedirect.com/science/article/pii/S0012821X07006061
     """
-    return (1. / x) * (np.sqrt(1. + (x * x)) - np.log(0.5 * (1. + np.sqrt(1. + (x * x)))) - 1.)
+    return ((1. / x) * (np.sqrt(1. + (x * x)) -
+            np.log(0.5 * (1. + np.sqrt(1. + (x * x)))) - 1.))
 
 
 def E_Star(Sc, CHT, LH):
@@ -403,8 +406,13 @@ def GetBestFitSc(Method, Data, DataErrs=None):
     package. Also returns the reduced chi squared as a measure of the goodness
     of fit.
     """
-    ScInit = 0.8  # Need to have an initial for the optimizer, any valid Sc value can be used - will not impact the final value
-    Fit_Sc = []  # Need to initialize this in case Method is incorrectly defined. Need some error handling!
+    # Need to have an initial for the optimizer, any valid Sc value can
+    # be used - will not impact the final value
+    ScInit = 0.8
+
+    # Need to initialize this in case Method is incorrectly defined.
+    # Need some error handling!
+    Fit_Sc = []
 
     if Method == 'raw':
         Fit_Sc, _, infodict, _, _ = optimize.leastsq(Residuals, ScInit,
@@ -467,8 +475,9 @@ def BootstrapSc(Method, Data, n=10000):
             Scs.append(sc[0])
             i += 1
 
-    #        mean                       upper bound                                 lower bound
-    return np.mean(Scs), np.percentile(Scs, 97.5) - np.mean(Scs), np.mean(Scs) - np.percentile(Scs, 2.5)
+    # mean, upper bound, lower bound
+    return (np.mean(Scs), np.percentile(Scs, 97.5) - np.mean(Scs),
+            np.mean(Scs) - np.percentile(Scs, 2.5))
 
 
 def SerializeData(LH, R, CHT):
@@ -513,7 +522,8 @@ def Labels(Sc, Method, ax):
     """
     # remove errorbars from the legend
     handles, labels = ax.get_legend_handles_labels()
-    handles = [h[0] if isinstance(h, container.ErrorbarContainer) else h for h in handles]
+    handles = [h[0] if isinstance(h, container.ErrorbarContainer)
+               else h for h in handles]
 
     # color scatterplot symbols like colormap
     for h in handles:
@@ -667,65 +677,115 @@ def IngestSettings():
 
     # typecheck inputs
     if not isinstance(Settings.Path, str):
-        sys.exit('Path=%s \nThis is not a valid string and so cannot be used as a path.\nExiting...' % Settings.Path)
+        sys.exit('Path=%s \nThis is not a valid string and so cannot be used as'
+                 ' a path.\nExiting...' % Settings.Path)
 
     if not isinstance(Settings.Prefix, str):
-        sys.exit('Prefix=%s \nThis is not a valid string and so cannot be used as a filename prefix.\nExiting...' % Settings.Prefix)
+        sys.exit('Prefix=%s \nThis is not a valid string and so cannot be used '
+                 'as a filename prefix.\nExiting...' % Settings.Prefix)
 
-    if not isinstance(Settings.Sc_Method, str) and not isinstance(Settings.Sc_Method, float):
-        sys.exit('Sc_Method=%s \nThis is not a valid string or floating point value.\nExiting...' % Settings.Sc_Method)
+    if not isinstance(Settings.Sc_Method,
+                      str) and not isinstance(Settings.Sc_Method, float):
+        sys.exit('Sc_Method=%s \nThis is not a valid string or floating point '
+                 'value.\nExiting...' % Settings.Sc_Method)
     else:
-        if isinstance(Settings.Sc_Method, str) and (Settings.Sc_Method != 'raw' and Settings.Sc_Method != 'patches' and Settings.Sc_Method != 'basins'):
-            sys.exit('Sc_Method=%s \nThis is not a valid method to fit a critical gradient. Valid options are \'raw\',\'patches\', or \'basins\'.\nExiting...' % Settings.Sc_Method)
-        if isinstance(Settings.Sc_Method, float) and (Settings.Sc_Method <= 0 or Settings.Sc_Method > 3):
-            sys.exit('Sc_Method=%s \nThis critical gradient not within a expected range of 0 to 3.\nExiting...' % Settings.Sc_Method)
+        if isinstance(Settings.Sc_Method,
+                      str) and (Settings.Sc_Method != 'raw' and
+                                Settings.Sc_Method != 'patches' and
+                                Settings.Sc_Method != 'basins'):
+            sys.exit('Sc_Method=%s \nThis is not a valid method to fit a '
+                     'critical gradient. Valid options are \'raw\',\'patches\','
+                     ' or \'basins\'.\nExiting...' % Settings.Sc_Method)
+        if isinstance(Settings.Sc_Method,
+                      float) and (Settings.Sc_Method <= 0 or
+                                  Settings.Sc_Method > 3):
+            sys.exit('Sc_Method=%s \nThis critical gradient not within the '
+                     'expected range of 0 to 3.\nExiting...'
+                     % Settings.Sc_Method)
 
     if not isinstance(Settings.RawFlag, int):
-        sys.exit('RawFlag should be set to 1 to plot the raw data or 0 to exclude the raw data. You have entered %s\nExiting...' % Settings.RawFlag)
+        sys.exit('RawFlag should be set to 1 to plot the raw data or 0 to '
+                 'exclude the raw data. You have entered %s\nExiting...'
+                 % Settings.RawFlag)
 
     if not isinstance(Settings.DensityFlag, int):
-        sys.exit('DensityFlag should be set to 1 to produce a density plot or 0 to not plot a density plot. Integer values greater than 1 will thin the data before plotting. You have entered %s\nExiting...' % Settings.DensityFlag)
+        sys.exit('DensityFlag should be set to 1 to produce a density plot or '
+                 '0 to not plot a density plot. Integer values greater than 1 '
+                 'will thin the data before plotting. You have entered '
+                 '%s\nExiting...' % Settings.DensityFlag)
 
     if not isinstance(Settings.BinFlag, str):
-        sys.exit('BinFlag=%s \nThis is not a valid string to select the binning method. If not performing binning, enter a blank string: \'\'.\nExiting...' % Settings.BinFlag)
+        sys.exit('BinFlag=%s \nThis is not a valid string to select the '
+                 'binning method. If not performing binning, enter a blank '
+                 'string: \'\'.\nExiting...' % Settings.BinFlag)
     else:
         if Settings.BinFlag:
-            if Settings.BinFlag.lower() != 'raw' and Settings.BinFlag.lower() != 'patches':
-                sys.exit('BinFlag=%s \nSelect either \'raw\' or \'patches\' as the binning method. Enter a blank string: \'\' if no binning is required.\nExiting...' % Settings.BinFlag)
+            if (Settings.BinFlag.lower() != 'raw' and
+                    Settings.BinFlag.lower() != 'patches'):
+                sys.exit('BinFlag=%s \nSelect either \'raw\' or \'patches\' as'
+                         ' the binning method. Enter a blank string: \'\' if no'
+                         ' binning is required.\nExiting...' % Settings.BinFlag)
 
     if not isinstance(Settings.NumBins, int):
-        sys.exit('NumBins should be set to the number of bins to be generated when binning the data. If no binning is to be performed, set the value to 0. You have entered %s\nExiting...' % Settings.NumBins)
+        sys.exit('NumBins should be set to the number of bins to be generated '
+                 'when binning the data. If no binning is to be performed, set '
+                 'the value to 0. You have entered %s\nExiting...'
+                 % Settings.NumBins)
 
     if not isinstance(Settings.PatchFlag, int):
-        sys.exit('PatchFlag should be set to 1 to plot the patch data or 0 to exclude the patch data. You have entered %s\nExiting...' % Settings.PatchFlag)
+        sys.exit('PatchFlag should be set to 1 to plot the patch data or 0 to '
+                 'exclude the patch data. You have entered %s\nExiting...'
+                 % Settings.PatchFlag)
 
     if not isinstance(Settings.BasinFlag, int):
-        sys.exit('BasinFlag should be set to 1 to plot the basin data or 0 to exclude the basin data. You have entered %s\nExiting...' % Settings.BasinFlag)
+        sys.exit('BasinFlag should be set to 1 to plot the basin data or 0 to '
+                 'exclude the basin data. You have entered %s\nExiting...'
+                 % Settings.BasinFlag)
 
     if not isinstance(Settings.LandscapeFlag, int):
-        sys.exit('LandscapeFlag should be set to 1 to plot the landscape average data or 0 to exclude the landscape average data. You have entered %s\nExiting...' % Settings.LandscapeFlag)
+        sys.exit('LandscapeFlag should be set to 1 to plot the landscape '
+                 'average data or 0 to exclude the landscape average data. You'
+                 ' have entered %s\nExiting...' % Settings.LandscapeFlag)
 
     if not isinstance(Settings.Order, int):
-        sys.exit('Order should be set to an integer (eg 1,2,3, etc) to load the basin average data generated for that order of basin. You have entered %s, of %s\nExiting...' % (Settings.Order, type(Settings.Order)))
+        sys.exit('Order should be set to an integer (eg 1,2,3, etc) to load '
+                 'the basin average data generated for that order of basin. You'
+                 ' have entered %s, of %s\nExiting...'
+                 % (Settings.Order, type(Settings.Order)))
 
     if not isinstance(Settings.ErrorBarFlag, bool):
-        sys.exit('ErrorBarFlag should be set to either True or False. True will generate plots with errorbars, False will exclude them. You have entered %s\nExiting...' % Settings.ErrorBarFlag)
+        sys.exit('ErrorBarFlag should be set to either True or False. True '
+                 'will generate plots with errorbars, False will exclude them. '
+                 'You have entered %s\nExiting...' % Settings.ErrorBarFlag)
 
     ValidFormats = ['png', 'pdf', 'ps', 'eps', 'svg']
     if not isinstance(Settings.Format, str):
-        sys.exit('Format=%s \nFile format must be a valid string.\nExiting...' % Settings.Format)
+        sys.exit('Format=%s \nFile format must be a valid string.\nExiting...'
+                 % Settings.Format)
         if Settings.Format.lower() not in ValidFormats:
-            sys.exit('Format=%s \nFile format must be one of: png, pdf, ps, eps or svg.\nExiting...' % Settings.Format)
+            sys.exit('Format=%s \nFile format must be one of: png, pdf, ps, '
+                     'eps or svg.\nExiting...' % Settings.Format)
 
     if not isinstance(Settings.GabilanMesa, bool):
-        sys.exit('GabilanMesa should be set to either True or False. True will plot data from Roering et al. (2007), False will not. You have entered %s\nExiting...' % Settings.GabilanMesa)
+        sys.exit('GabilanMesa should be set to either True or False. True will '
+                 'plot data from Roering et al. (2007), False will not. You '
+                 'have entered %s\nExiting...' % Settings.GabilanMesa)
     if not isinstance(Settings.OregonCoastRange, bool):
-        sys.exit('OregonCoastRange should be set to either True or False. True will plot data from Roering et al. (2007), False will not. You have entered %s\nExiting...' % Settings.OregonCoastRange)
+        sys.exit('OregonCoastRange should be set to either True or False. True '
+                 'will plot data from Roering et al. (2007), False will not. '
+                 'You have entered %s\nExiting...' % Settings.OregonCoastRange)
     if not isinstance(Settings.SierraNevada, bool):
-        sys.exit('SierraNevada should be set to either True or False. True will plot data from Roering et al. (2007), False will not. You have entered %s\nExiting...' % Settings.SierraNevada)
+        sys.exit('SierraNevada should be set to either True or False. True will'
+                 ' plot data from Roering et al. (2007), False will not. You '
+                 'have entered %s\nExiting...' % Settings.SierraNevada)
 
     if not isinstance(Settings.NumBootsraps, int):
-        sys.exit('NumBootsraps should be set to an integer (eg 10000) to select the number of iterations in the bootstrapping calculation.\n\nThis value is ignored if a value of Sc is supplied. Using a value > 10000 will take a long time on big datasets. You have entered %s, of %s\nExiting...' % (Settings.NumBootsraps, type(Settings.NumBootsraps)))
+        sys.exit('NumBootsraps should be set to an integer (eg 10000) to select'
+                 ' the number of iterations in the bootstrapping calculation.'
+                 '\n\nThis value is ignored if a value of Sc is supplied. Using'
+                 ' a value > 10000 will take a long time on big datasets. You '
+                 'have entered %s, of %s\nExiting...'
+                 % (Settings.NumBootsraps, type(Settings.NumBootsraps)))
 
     MakeThePlot(Settings.Path, Settings.Prefix, Settings.Sc_Method,
                 Settings.RawFlag, Settings.DensityFlag, Settings.BinFlag,
