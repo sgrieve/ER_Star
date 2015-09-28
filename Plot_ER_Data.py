@@ -96,16 +96,17 @@ def PropagateErrors(PatchData, BasinData):
     errors through our calculations.
     """
 
-    #median, sem
-    patchLH = unp.uarray(PatchData[2],PatchData[4])
-    patchR = unp.uarray(PatchData[10],PatchData[12])
-    patchCHT = unp.uarray(PatchData[6],PatchData[8])
+    # median, sem
+    patchLH = unp.uarray(PatchData[2], PatchData[4])
+    patchR = unp.uarray(PatchData[10], PatchData[12])
+    patchCHT = unp.uarray(PatchData[6], PatchData[8])
 
-    basinLH = unp.uarray(BasinData[5],BasinData[13])
-    basinR = unp.uarray(BasinData[7],BasinData[15])
-    basinCHT = unp.uarray(BasinData[6],BasinData[14])
+    basinLH = unp.uarray(BasinData[5], BasinData[13])
+    basinR = unp.uarray(BasinData[7], BasinData[15])
+    basinCHT = unp.uarray(BasinData[6], BasinData[14])
 
-    return (patchLH,patchR,patchCHT),(basinLH,basinR,basinCHT)
+    return (patchLH, patchR, patchCHT), (basinLH, basinR, basinCHT)
+
 
 def SetUpPlot():
     """
@@ -123,160 +124,181 @@ def SetUpPlot():
     plt.xlabel('Dimensionless Erosion Rate, E*')
     plt.ylabel('Dimensionless Relief, R*')
 
-    plt.ylim(0.05,1.1)
-    plt.xlim(0.1,1000)
+    plt.ylim(0.05, 1.1)
+    plt.xlim(0.1, 1000)
 
     return ax
 
-def PlotRaw(Sc,RawData):
+
+def PlotRaw(Sc, RawData):
     """
     Plot the raw E*R* data as small grey points.
     """
-    plt.plot(E_Star(Sc,RawData[3],RawData[2]),R_Star(Sc,RawData[4],RawData[2]),
-    'k.',alpha=0.2,label='Raw Data')
+    plt.plot(E_Star(Sc, RawData[3], RawData[2]), R_Star(Sc, RawData[4],
+             RawData[2]), 'k.', alpha=0.2, label='Raw Data')
 
-def PlotRawDensity(Sc,RawData,Thin):
+
+def PlotRawDensity(Sc, RawData, Thin):
     """
     Plot the raw E*R* data as a density plot, computing the PDF as a gaussian
     and including a colorbar.
 
     Built around code from: http://stackoverflow.com/a/20107592/1627162
     """
-    x = E_Star(Sc,RawData[3],RawData[2])
-    y = R_Star(Sc,RawData[4],RawData[2])
+    x = E_Star(Sc, RawData[3], RawData[2])
+    y = R_Star(Sc, RawData[4], RawData[2])
 
     if Thin:
         x = x[::Thin]
         y = y[::Thin]
 
-    xy = np.vstack([x,y])
+    xy = np.vstack([x, y])
     density = gaussian_kde(xy)(xy)
 
-    #order the points by density so highest density is on top in the plot
+    # order the points by density so highest density is on top in the plot
     idx = density.argsort()
     x, y, density = x[idx], y[idx], density[idx]
 
-    plt.scatter(x,y,c=density,edgecolor='',cmap=plt.get_cmap("autumn_r"))
+    plt.scatter(x, y, c=density, edgecolor='', cmap=plt.get_cmap("autumn_r"))
     cbar = plt.colorbar()
     cbar.set_label('Probability Distribution Function')
 
-def PlotRawBins(Sc,RawData,NumBins,MinimumBinSize=100,ErrorBars=True):
+
+def PlotRawBins(Sc, RawData, NumBins, MinimumBinSize=100, ErrorBars=True):
     """
     Plot E*R* data binned from the raw data.
     """
     E_s = E_Star(Sc, RawData[3], RawData[2])
     R_s = R_Star(Sc, RawData[4], RawData[2])
 
-    bin_x, bin_std_x, bin_y, bin_std_y, std_err_x, std_err_y, count = Bin.bin_data_log10(E_s,R_s,NumBins)
+    bin_x, bin_std_x, bin_y, bin_std_y, std_err_x, std_err_y, count =
+    Bin.bin_data_log10(E_s, R_s, NumBins)
 
-    #filter bins based on the number of data points used in their calculation
-    bin_x = np.ma.masked_where(count<MinimumBinSize, bin_x)
-    bin_y = np.ma.masked_where(count<MinimumBinSize, bin_y)
-    #these lines produce a meaningless warning - don't know how to solve it yet.
+    # filter bins based on the number of data points used in their calculation
+    bin_x = np.ma.masked_where(count < MinimumBinSize, bin_x)
+    bin_y = np.ma.masked_where(count < MinimumBinSize, bin_y)
+    # these lines produce a meaningless warning - don't know how to solve it yet
 
     if ErrorBars:
-        #only plot errorbars for y as std dev of x is just the bin width == meaningless
-        plt.scatter(bin_x,bin_y,c=count,s=50,edgecolor='',cmap=plt.get_cmap("autumn_r"),label='Binned Raw Data', zorder=100)
-        plt.errorbar(bin_x, bin_y, yerr=std_err_y, fmt=None,ecolor='k', zorder=0)
+        # only plot errorbars for y as std dev of x is the bin width
+        plt.scatter(bin_x, bin_y, c=count, s=50, edgecolor='',
+                    cmap=plt.get_cmap("autumn_r"), label='Binned Raw Data',
+                    zorder=100)
+        plt.errorbar(bin_x, bin_y, yerr=std_err_y, fmt=None, ecolor='k',
+                     zorder=0)
         cbar = plt.colorbar()
         cbar.set_label('Number of values per bin')
     else:
-        plt.errorbar(bin_x, bin_y, fmt='bo',label='Binned Raw Data')
+        plt.errorbar(bin_x, bin_y, fmt='bo', label='Binned Raw Data')
 
-def PlotPatchBins(Sc,PatchData,NumBins,MinimumBinSize=10,ErrorBars=True):
+
+def PlotPatchBins(Sc, PatchData, NumBins, MinimumBinSize=10, ErrorBars=True):
     """
     Plot E*R* data binned from the hilltop pacth data.
     """
-    E_s = E_Star(Sc,PatchData[6],PatchData[2])
-    R_s = R_Star(Sc,PatchData[10],PatchData[2])
+    E_s = E_Star(Sc, PatchData[6], PatchData[2])
+    R_s = R_Star(Sc, PatchData[10], PatchData[2])
 
-    bin_x, bin_std_x, bin_y, bin_std_y, std_err_x, std_err_y, count = Bin.bin_data_log10(E_s,R_s,NumBins)
+    bin_x, bin_std_x, bin_y, bin_std_y, std_err_x, std_err_y, count =
+    Bin.bin_data_log10(E_s, R_s, NumBins)
 
-    #filter bins based on the number of data points used in their calculation
-    bin_x = np.ma.masked_where(count<MinimumBinSize, bin_x)
-    bin_y = np.ma.masked_where(count<MinimumBinSize, bin_y)
-    #these lines produce a meaningless warning - don't know how to solve it yet.
+    # filter bins based on the number of data points used in their calculation
+    bin_x = np.ma.masked_where(count < MinimumBinSize, bin_x)
+    bin_y = np.ma.masked_where(count < MinimumBinSize, bin_y)
+    # these lines produce a meaningless warning - don't know how to solve it yet
 
     if ErrorBars:
-        #only plot errorbars for y as std dev of x is just the bin width == meaningless
-        plt.scatter(bin_x,bin_y,c=count,s=50,edgecolor='',cmap=plt.get_cmap("autumn_r"),label='Binned Patch Data', zorder=100)
-        plt.errorbar(bin_x, bin_y, yerr=std_err_y, fmt=None,ecolor='k', zorder=0)
+        # only plot errorbars for y as std dev of x is the bin width
+        plt.scatter(bin_x, bin_y, c=count, s=50, edgecolor='',
+                    cmap=plt.get_cmap("autumn_r"), label='Binned Patch Data',
+                    zorder=100)
+        plt.errorbar(bin_x, bin_y, yerr=std_err_y, fmt=None, ecolor='k',
+                     zorder=0)
         cbar = plt.colorbar()
         cbar.set_label('Number of values per bin')
 
     else:
-        plt.errorbar(bin_x, bin_y, fmt='bo',label='Binned Patch Data')
+        plt.errorbar(bin_x, bin_y, fmt='bo', label='Binned Patch Data')
 
-def PlotPatches(Sc,PatchData,ErrorBars):
+
+def PlotPatches(Sc, PatchData, ErrorBars):
     """
     Plot E*R* data binned from hilltop patches.
     """
     e_star = E_Star(Sc,PatchData[2],PatchData[0])
-    r_star = R_Star(Sc,PatchData[1],PatchData[0])
+    r_star = R_Star(Sc, PatchData[1], PatchData[0])
     if ErrorBars:
-        plt.errorbar(unp.nominal_values(e_star),unp.nominal_values(r_star),yerr=unp.std_devs(r_star),xerr=unp.std_devs(e_star),
-                     fmt='ro',label='Hilltop Patch Data')
+        plt.errorbar(unp.nominal_values(e_star), unp.nominal_values(r_star),
+                     yerr=unp.std_devs(r_star), xerr=unp.std_devs(e_star),
+                     fmt='ro', label='Hilltop Patch Data')
     else:
-        plt.errorbar(unp.nominal_values(e_star),unp.nominal_values(r_star),
-                     fmt='ro',label='Hilltop Patch Data')
+        plt.errorbar(unp.nominal_values(e_star), unp.nominal_values(r_star),
+                     fmt='ro', label='Hilltop Patch Data')
 
-def PlotPatchesArea(Sc,PatchData,thresh,alpha):
+
+def PlotPatchesArea(Sc, PatchData, thresh, alpha):
     """
     Plot patch average E*R* data filtered by a user defined patch area value.
     """
-    e_star = E_Star(Sc,PatchData[6],PatchData[2])
-    r_star = R_Star(Sc,PatchData[10],PatchData[2])
+    e_star = E_Star(Sc, PatchData[6], PatchData[2])
+    r_star = R_Star(Sc, PatchData[10], PatchData[2])
     area = PatchData[17]
 
     x = []
     y = []
 
-    for a,b,s in zip(e_star,r_star,area):
+    for a, b, s in zip(e_star, r_star, area):
         if s > thresh:
             x.append(a)
             y.append(b)
 
-    plt.plot(x,y,color='k',alpha=alpha,marker='o',linestyle='',label='Min. Patch Area = '+str(thresh))
+    plt.plot(x, y, color='k', alpha=alpha, marker='o', linestyle='',
+             label='Min. Patch Area = ' + str(thresh))
 
-def PlotBasins(Sc,BasinData,ErrorBars):
+
+def PlotBasins(Sc, BasinData, ErrorBars):
     """
     Plot basin average E*R* data.
     """
-    e_star = E_Star(Sc,BasinData[2],BasinData[0])
-    r_star = R_Star(Sc,BasinData[1],BasinData[0])
+    e_star = E_Star(Sc, BasinData[2], BasinData[0])
+    r_star = R_Star(Sc, BasinData[1], BasinData[0])
 
     if ErrorBars:
-        plt.errorbar(unp.nominal_values(e_star),unp.nominal_values(r_star),yerr=unp.std_devs(r_star),xerr=unp.std_devs(e_star),
-                     fmt='go',label='Basin Data')
+        plt.errorbar(unp.nominal_values(e_star), unp.nominal_values(r_star),
+                     yerr=unp.std_devs(r_star), xerr=unp.std_devs(e_star),
+                     fmt='go', label='Basin Data')
     else:
-        plt.errorbar(unp.nominal_values(e_star),unp.nominal_values(r_star),
-                     fmt='go',label='Basin Data')
+        plt.errorbar(unp.nominal_values(e_star), unp.nominal_values(r_star),
+                     fmt='go', label='Basin Data')
 
-def PlotBasinsArea(Sc,BasinData,thresh,alpha):
+
+def PlotBasinsArea(Sc, BasinData, thresh, alpha):
     """
     Plot basin average E*R* data filtered by a user defined basin area value.
     """
-    e_star = E_Star(Sc,BasinData[6],BasinData[5])
-    r_star = R_Star(Sc,BasinData[7],BasinData[5])
+    e_star = E_Star(Sc, BasinData[6], BasinData[5])
+    r_star = R_Star(Sc, BasinData[7], BasinData[5])
     area = BasinData[18]
 
     x = []
     y = []
 
-    for a,b,s in zip(e_star,r_star,area):
+    for a, b, s in zip(e_star, r_star, area):
         if s > thresh:
             x.append(a)
             y.append(b)
 
-    plt.plot(x,y,color='k',alpha=alpha,marker='o',linestyle='',label='Min. Basin Data Points = '+str(thresh))
+    plt.plot(x, y, color='k', alpha=alpha, marker='o', linestyle='',
+             label='Min. Basin Data Points = ' + str(thresh))
 
-def PlotLandscapeAverage(Sc,RawData,ErrorBars):
+
+def PlotLandscapeAverage(Sc, RawData, ErrorBars):
     """
-    Plot a landscape median data point, calculated using the raw data, and generating
-    errorbars using the standard error.
+    Plot a landscape median data point, calculated using the raw data, and
+    generating errorbars using the standard error.
     """
-    E_Star_temp = E_Star(Sc,RawData[3],RawData[2])
-    R_Star_temp = R_Star(Sc,RawData[4],RawData[2])
+    E_Star_temp = E_Star(Sc, RawData[3], RawData[2])
+    R_Star_temp = R_Star(Sc, RawData[4], RawData[2])
     E_Star_avg = np.median(E_Star_temp)
     R_Star_avg = np.median(R_Star_temp)
 
@@ -285,63 +307,71 @@ def PlotLandscapeAverage(Sc,RawData,ErrorBars):
         R_Star_std = np.std(R_Star_temp)
         E_Star_serr = sem(E_Star_temp)
         R_Star_serr = sem(R_Star_temp)
-        plt.errorbar(E_Star_avg,R_Star_avg,yerr=R_Star_serr,xerr=E_Star_serr,
-                     fmt='ko',label='Landscape Average')
+        plt.errorbar(E_Star_avg, R_Star_avg, yerr=R_Star_serr, xerr=E_Star_serr,
+                     fmt='ko', label='Landscape Average')
     else:
-        plt.errorbar(E_Star_avg,R_Star_avg, fmt='ko',label='Landscape Average')
+        plt.errorbar(E_Star_avg, R_Star_avg, fmt='ko',
+                     label='Landscape Average')
+
 
 def R_Star_Model(x):
     """
     Return the predicted R* value for a given value of E* using eq 10 in Roering
-    et al. (2007) http://www.sciencedirect.com/science/article/pii/S0012821X07006061
+    et al. (2007) www.sciencedirect.com/science/article/pii/S0012821X07006061
     """
     return (1./x) * (np.sqrt(1.+(x*x)) - np.log(0.5*(1. + np.sqrt(1.+(x*x)))) - 1.)
 
-def E_Star(Sc,CHT,LH):
+
+def E_Star(Sc, CHT, LH):
     """
     Calculate the E* value from topographic data after Roering et al. (2007)
     http://www.sciencedirect.com/science/article/pii/S0012821X07006061
     """
     if type(LH[0]) == np.float64:
-        return (2.*np.fabs(CHT)*LH)/Sc
+        return (2. * np.fabs(CHT) * LH) / Sc
     else:
-        return (2.*unp.fabs(CHT)*LH)/Sc
+        return (2. * unp.fabs(CHT) * LH) / Sc
+
 
 def R_Star(Sc, R, LH):
     """
     Calculate the R* value from topographic data after Roering et al. (2007)
     http://www.sciencedirect.com/science/article/pii/S0012821X07006061
     """
-    return R/(LH*Sc)
+    return R / (LH * Sc)
+
 
 def Residuals(Sc, R, LH, CHT):
     """
     Calculate the residuals between the R* value computed using eq 10 in Roering
-    et al. (2007) (http://www.sciencedirect.com/science/article/pii/S0012821X07006061)
+    et al. (2007) (www.sciencedirect.com/science/article/pii/S0012821X07006061)
     and the R* calculated from topographic data.
     """
-    return R_Star_Model(E_Star(Sc,CHT,LH)) - R_Star(Sc, R, LH)
+    return R_Star_Model(E_Star(Sc, CHT, LH)) - R_Star(Sc, R, LH)
 
-def reduced_chi_square(Residuals,Sc,DataErrs=None):
+
+def reduced_chi_square(Residuals, Sc, DataErrs=None):
     """
     Compute a reduced chi square value for the best fit Sc value.
     """
-    #if we are fitting from patches or basins, get the std err and include in the chi squared
+    # if we are fitting from patches or basins, get the std err and include
+    # in the chi squared
     if DataErrs:
-        r_star = R_Star(Sc,DataErrs[1],DataErrs[0])
+        r_star = R_Star(Sc, DataErrs[1], DataErrs[0])
 
-        #get rid of any divide by zero errors
-        temp = ((Residuals/unp.std_devs(r_star))**2)
+        # get rid of any divide by zero errors
+        temp = ((Residuals / unp.std_devs(r_star)) ** 2)
         temp[np.isinf(temp)] = 0
         chi_square = np.sum(temp)
 
     else:
-        chi_square = np.sum(Residuals**2)
+        chi_square = np.sum(Residuals ** 2)
 
     # degrees of freedom, as we have 1 free parameter, Sc
-    d_o_f = Residuals.size-2
+    d_o_f = Residuals.size - 2
 
-    return chi_square/d_o_f
+    return chi_square / d_o_f
+
 
 def r_squared(Sc, R, LH, CHT, infodict):
     """
@@ -354,15 +384,17 @@ def r_squared(Sc, R, LH, CHT, infodict):
     sqr_err_w_line = np.square(infodict['fvec'])
     sqr_err_mean = np.square((measured - mean_measured))
 
-    return 1.-(np.sum(sqr_err_w_line)/np.sum(sqr_err_mean))
+    return 1. - (np.sum(sqr_err_w_line) / np.sum(sqr_err_mean))
+
 
 def DrawCurve():
     """
     Plot the steady state curve in E*R* space.
     """
-    #plot the e* r* curve from roering 2007
+    # plot the e* r* curve from roering 2007
     x = np.arange(0.01, 1000, 0.1)
     plt.plot(x, R_Star_Model(x), 'k-', linewidth=2, label='Nonlinear Flux Law')
+
 
 def GetBestFitSc(Method, Data, DataErrs=None):
     """
@@ -371,19 +403,34 @@ def GetBestFitSc(Method, Data, DataErrs=None):
     of fit.
     """
     ScInit = 0.8  # Need to have an initial for the optimizer, any valid Sc value can be used - will not impact the final value
-    Fit_Sc = [] #Need to initialize this in case Method is incorrectly defined. Need some error handling!
+    Fit_Sc = [] # Need to initialize this in case Method is incorrectly defined. Need some error handling!
 
     if Method == 'raw':
-        Fit_Sc,_,infodict,_,_ = optimize.leastsq(Residuals, ScInit, args=(Data[4], Data[2], Data[3]),full_output=True)
-        chi = reduced_chi_square(infodict['fvec'],Fit_Sc[0])
-    elif Method == 'patches':
-        Fit_Sc,_,infodict,_,_ = optimize.leastsq(Residuals, ScInit, args=(Data[10], Data[2], Data[6]),full_output=True)
-        chi = reduced_chi_square(infodict['fvec'],Fit_Sc[0],DataErrs)
-    elif Method == 'basins':
-        Fit_Sc,_,infodict,_,_ = optimize.leastsq(Residuals, ScInit, args=(Data[7], Data[5], Data[6]),full_output=True)
-        chi = reduced_chi_square(infodict['fvec'],Fit_Sc[0],DataErrs)
+        Fit_Sc, _, infodict, _, _ = optimize.leastsq(Residuals, ScInit,
+                                                     args=(Data[4], Data[2],
+                                                           Data[3]),
+                                                     full_output=True)
 
-    return Fit_Sc[0],chi
+        chi = reduced_chi_square(infodict['fvec'], Fit_Sc[0])
+
+    elif Method == 'patches':
+        Fit_Sc, _, infodict, _, _ = optimize.leastsq(Residuals, ScInit,
+                                                     args=(Data[10], Data[2],
+                                                           Data[6]),
+                                                     full_output=True)
+
+        chi = reduced_chi_square(infodict['fvec'], Fit_Sc[0], DataErrs)
+
+    elif Method == 'basins':
+        Fit_Sc, _, infodict, _, _ = optimize.leastsq(Residuals, ScInit,
+                                                     args=(Data[7], Data[5],
+                                                           Data[6]),
+                                                     full_output=True)
+
+        chi = reduced_chi_square(infodict['fvec'], Fit_Sc[0], DataErrs)
+
+    return Fit_Sc[0], chi
+
 
 def BootstrapSc(Method, Data, n=10000):
     """
@@ -393,57 +440,61 @@ def BootstrapSc(Method, Data, n=10000):
     Values of n larger than 10000 will take a long time to run.
     """
     tmp = []
-    #need to convert the LH,R,CHT data into a serial 1D array before bootstrapping
+    # convert the LH,R,CHT data into a serial 1D array before bootstrapping
     if Method == 'raw':
         for i in range(len(Data[0])):
-            tmp.append(SerializeData(Data[2][i],Data[4][i],Data[3][i]))
+            tmp.append(SerializeData(Data[2][i], Data[4][i], Data[3][i]))
     if Method == 'patches':
         for i in range(len(Data[0])):
-            tmp.append(SerializeData(Data[2][i],Data[10][i],Data[6][i]))
+            tmp.append(SerializeData(Data[2][i], Data[10][i], Data[6][i]))
     if Method == 'basins':
         for i in range(len(Data[0])):
-            tmp.append(SerializeData(Data[5][i],Data[7][i],Data[6][i]))
+            tmp.append(SerializeData(Data[5][i], Data[7][i], Data[6][i]))
 
     ToSample = np.array(tmp)
 
     Scs = []
-    i=0
+    i = 0
     while i < n:
-        print i
+        print 'Iteration', i + 1, 'of', n
 
-        sample = np.random.choice(ToSample,len(ToSample),replace=True)
+        sample = np.random.choice(ToSample, len(ToSample), replace=True)
         LH,R,CHT = UnserializeList(sample)
-        sc,_,_,_,_ = optimize.leastsq(Residuals, 0.8, args=(R, LH, CHT),full_output=True)
+        sc, _, _, _, _ = optimize.leastsq(Residuals, 0.8, args=(R, LH, CHT),
+                                          full_output=True)
         if sc < 2.0:
             Scs.append(sc[0])
             i += 1
 
-    #        mean          upper bound                               lower bound
-    return np.mean(Scs),np.percentile(Scs,97.5)-np.mean(Scs), np.mean(Scs)-np.percentile(Scs,2.5)
+    #        mean                       upper bound                                 lower bound
+    return np.mean(Scs), np.percentile(Scs, 97.5) - np.mean(Scs), np.mean(Scs) - np.percentile(Scs, 2.5)
+
 
 def SerializeData(LH, R, CHT):
     """
-    Convert the hillslope length, relief, and hilltop curvature data into a string,
-    to facilitate the sampling by replacement of the data in the bootstrapping
-    method.
+    Convert the hillslope length, relief, and hilltop curvature data into a
+    string, to facilitate the sampling by replacement of the data in the
+    bootstrapping method.
     """
     return str([LH, R, CHT])[1:-1]
+
 
 def UnserializeList(serial_list):
     """
     Convenicence function to unserialize a list of serialized data and return
     arrays of hillslope length, relief, and hilltop curvature.
     """
-    LH=[]
-    R=[]
-    CHT=[]
+    LH = []
+    R = []
+    CHT = []
     for s in serial_list:
-       lh,r,cht = UnserializeData(s)
-       LH.append(lh)
-       R.append(r)
-       CHT.append(cht)
+        lh, r, cht = UnserializeData(s)
+        LH.append(lh)
+        R.append(r)
+        CHT.append(cht)
 
-    return np.array(LH),np.array(R),np.array(CHT)
+    return np.array(LH), np.array(R), np.array(CHT)
+
 
 def UnserializeData(serial):
     """
@@ -451,26 +502,27 @@ def UnserializeData(serial):
     in their original format.
     """
     split = [float(s) for s in serial.split(',')]
-    return split[0],split[1],split[2]
+    return split[0], split[1], split[2]
 
-def Labels(Sc,Method,ax):
+
+def Labels(Sc, Method, ax):
     """
     Method to handle the labelling of axes, generation of a legend and creation
     of a plot title.
     """
-    #remove errorbars from the legend
+    # remove errorbars from the legend
     handles, labels = ax.get_legend_handles_labels()
     handles = [h[0] if isinstance(h, container.ErrorbarContainer) else h for h in handles]
 
-    #color scatterplot symbols like colormap
+    # color scatterplot symbols like colormap
     for h in handles:
         if isinstance(h, collections.PathCollection):
             h.set_color('r')
             h.set_edgecolor('')
 
-    ax.legend(handles, labels, loc=4, numpoints=1,scatterpoints=1)
+    ax.legend(handles, labels, loc=4, numpoints=1, scatterpoints=1)
 
-    #in case Method is invalid
+    # in case Method is invalid
     fit_description = ' = '
 
     if Method == 'raw':
@@ -482,18 +534,20 @@ def Labels(Sc,Method,ax):
     elif Method == 'basins':
         fit_description = ' from basin average data = '
 
-    if isinstance(Method,int) or isinstance(Method,float):
-        plt.title('$\mathregular{S_c}$ = ' + str(round(Sc,2)), y = 1.02)
+    if isinstance(Method, int) or isinstance(Method, float):
+        plt.title('$\mathregular{S_c}$ = ' + str(round(Sc, 2)), y=1.02)
     else:
-        plt.title('Best fit $\mathregular{S_c}$'+fit_description+str(round(Sc,2)), y = 1.02)
+        plt.title('Best fit $\mathregular{S_c}$' +
+                  fit_description + str(round(Sc, 2)), y=1.02)
 
-def SavePlot(Path,Prefix,Format):
+
+def SavePlot(Path, Prefix, Format):
     """
-    Wrapper function around the matplotlib savefig method, which save a high resolution
-    copy of the final figure into the user supplied path with the user suppied
-    file format.
+    Wrapper function around the matplotlib savefig method, which save a high
+    resolution copy of the final figure into the user supplied path with the
+    user suppied file format.
     """
-    plt.savefig(Path+Prefix+'_E_R_Star.'+Format,dpi=500)
+    plt.savefig(Path + Prefix + '_E_R_Star.' + Format, dpi=500)
     plt.clf()
 
 def CRHurst():
