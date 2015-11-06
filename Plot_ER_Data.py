@@ -613,9 +613,9 @@ def OCRRoering():
 
 
 def MakeThePlot(Path, Prefix, Sc_Method, RawFlag, DensityFlag, BinFlag, NumBins,
-                PatchFlag, BasinFlag, LandscapeFlag, Order, ErrorBarFlag=True,
-                Format='png', ComparisonData=(False, False, False),
-                NumBootsraps=10000):
+                MinBinSize, PatchFlag, BasinFlag, LandscapeFlag, Order,
+                ErrorBarFlag=True, Format='png',
+                ComparisonData=(False, False, False), NumBootsraps=10000):
     """
     Method which controls the generation of E*R* data. Does not need to be
     interfaced with directly. Is called by the IngestSettings method using
@@ -646,9 +646,11 @@ def MakeThePlot(Path, Prefix, Sc_Method, RawFlag, DensityFlag, BinFlag, NumBins,
     if PatchFlag:
         PlotPatches(Sc, PatchDataErrs, ErrorBarFlag)
     if BinFlag == 'patches':
-        PlotPatchBins(Sc, PatchData, NumBins, ErrorBars=ErrorBarFlag)
+        PlotPatchBins(Sc, PatchData, NumBins, MinimumBinSize=MinBinSize,
+                      ErrorBars=ErrorBarFlag)
     elif BinFlag == 'raw':
-        PlotRawBins(Sc, RawData, NumBins, ErrorBars=ErrorBarFlag)
+        PlotRawBins(Sc, RawData, NumBins, MinimumBinSize=MinBinSize,
+                    ErrorBars=ErrorBarFlag)
     if BasinFlag:
         PlotBasins(Sc, BasinDataErrs, ErrorBarFlag)
     if LandscapeFlag:
@@ -784,16 +786,22 @@ def IngestSettings():
                  ' the number of iterations in the bootstrapping calculation.'
                  '\n\nThis value is ignored if a value of Sc is supplied. Using'
                  ' a value > 10000 will take a long time on big datasets. You '
-                 'have entered %s, of %s\nExiting...'
+                 'have entered %s, of type %s\nExiting...'
                  % (Settings.NumBootsraps, type(Settings.NumBootsraps)))
+
+    if not isinstance(Settings.MinBinSize, int):
+        sys.exit('MinBinSize should be set to an integer (eg 100) to select'
+                 ' the number data points needed to make a bin valid. You'
+                 'have entered %s, of type %s\nExiting...'
+                 % (Settings.MinBinSize, type(Settings.MinBinSize)))
 
     MakeThePlot(Settings.Path, Settings.Prefix, Settings.Sc_Method,
                 Settings.RawFlag, Settings.DensityFlag, Settings.BinFlag,
-                Settings.NumBins, Settings.PatchFlag, Settings.BasinFlag,
-                Settings.LandscapeFlag, Settings.Order, Settings.ErrorBarFlag,
-                Settings.Format, (Settings.GabilanMesa,
-                                  Settings.OregonCoastRange,
-                                  Settings.SierraNevada), Settings.NumBootsraps)
+                Settings.NumBins, Settings.MinBinSize, Settings.PatchFlag,
+                Settings.BasinFlag, Settings.LandscapeFlag, Settings.Order,
+                Settings.ErrorBarFlag, Settings.Format,
+                (Settings.GabilanMesa, Settings.OregonCoastRange,
+                 Settings.SierraNevada), Settings.NumBootsraps)
 
 IngestSettings()
 
