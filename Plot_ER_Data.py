@@ -124,8 +124,11 @@ def SetUpPlot():
     ax.set_yscale('log', nonposy='clip')
     ax.set_xscale('log', nonposx='clip')
 
-    plt.xlabel('Dimensionless Erosion Rate, E*')
-    plt.ylabel('Dimensionless Relief, R*')
+    plt.xlabel('Dimensionless Erosion Rate, ${E^*}$', size=18)
+    plt.ylabel('Dimensionless Relief, ${R^*}$', size=18)
+
+    plt.setp(ax.get_xticklabels(), fontsize=16)
+    plt.setp(ax.get_yticklabels(), fontsize=16)
 
     plt.ylim(0.05, 1.1)
     plt.xlim(0.1, 1000)
@@ -465,7 +468,8 @@ def BootstrapSc(Method, Data, n=10000):
     Scs = []
     i = 0
     while i < n:
-        print 'Iteration', i + 1, 'of', n
+        if (i % 1000 == 0):
+            print 'Iteration', i + 1, 'of', n
 
         sample = np.random.choice(ToSample, len(ToSample), replace=True)
         LH, R, CHT = UnserializeList(sample)
@@ -568,7 +572,7 @@ def CRHurst():
     (http://onlinelibrary.wiley.com/doi/10.1029/2011JF002057/full) seen in
     figure 14.
     """
-    # needs the errorbars
+
     x = [1.15541793184, 2.96599962747, 5.06753455114, 6.87537359947,
          8.86462081724, 10.9425778888, 12.9426702489, 14.9866553641,
          16.9785507349, 19.0034609662, 20.9560856862, 22.8577931724,
@@ -581,7 +585,15 @@ def CRHurst():
          0.953440506329, 0.851824367089, 0.97046835443, 0.909219409283,
          0.964772151899, 1.08295780591, 0.904050632911, 1.13525316456,
          0.934139240506]
-    plt.plot(x, y, 'k^', label='Hurst et al. 2012')
+
+    yStdErr = [0.12913016, 0.03901928, 0.04112731, 0.02724568, 0.04694418,
+               0.04026138, 0.03122017, 0.02083737, 0.01752255, 0.02029758,
+               0.02403573, 0.02065953, 0.02382283, 0.021544, 0.0216427,
+               0.02044206, 0.02158805, 0.02227467, 0.03237965, 0.04332041,
+               0.09519842]
+
+    plt.errorbar(x, y, yerr=yStdErr, fmt='k^', label='Hurst et al. (2012)',
+                 elinewidth=2, capsize=3, markersize=6)
 
 
 def GMRoering():
